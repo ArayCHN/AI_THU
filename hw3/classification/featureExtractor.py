@@ -79,7 +79,17 @@ class PCAFeatureExtractorDigit(BaseFeatureExtractor):
         self.mean = np.mean(trainingData, axis=0)
         data = trainingData - self.mean
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        data = data.T # rearrange data to perform SVD
+        # Sigma * V.T is the coordinates of X in U({u1, u2, ... , um}) space
+        U, Sigma, VT = np.linalg.svd(data, full_matrices = False) # Sigma is a line vector of sigmas on diagonal...
+        # VT is the first m lines of V.transpose()
+        # print "U shape", U.shape
+        # print "Sigma shape", Sigma.shape
+        # print "VT shape", VT.shape
+        Newdata = np.array([Sigma]).T * VT # use broadcast rule to obtain Sigma * V.T
+        # the first l lines of Newdata is X's PCA coordinates with dimension l
+        self.weights = U[:, 0: self.dimension]
+        return Newdata[0: self.dimension, :].T # change column vectors into row vectors
     
     def extract(self, data):
         """
@@ -88,6 +98,7 @@ class PCAFeatureExtractorDigit(BaseFeatureExtractor):
         :return: features, in numpy format, features.shape = (len(data), self.dimension)
         """
         "*** YOUR CODE HERE ***"
+        return np.dot(data - self.mean, self.weights)
         util.raiseNotDefined()
     
     def reconstruct(self, pcaData):
@@ -97,8 +108,10 @@ class PCAFeatureExtractorDigit(BaseFeatureExtractor):
         :param pcaData: in numpy format, features.shape[1] = self.dimension
         :return: originalData, in numpy format, originalData.shape[1] = 784
         """
+        # print "pcaData shape:", pcaData.shape[0], ' ', pcaData.shape[1]
         assert pcaData.shape[1]==self.dimension
         "*** YOUR CODE HERE ***"
+        return np.dot(self.weights, pcaData.T).T + self.mean
         util.raiseNotDefined()
 
     def visualize(self, data):
