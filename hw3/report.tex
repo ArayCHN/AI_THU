@@ -1,0 +1,97 @@
+\documentclass{article}
+\usepackage{graphicx} % include figures
+\usepackage{xeCJK} % Chinese language support
+\usepackage{bm}
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{cite}
+\usepackage[colorlinks,linkcolor=red,anchorcolor=blue,citecolor=green,CJKbookmarks=true]{hyperref}
+\usepackage{indentfirst} % indent before a paragraph, Chinese-style
+\usepackage{amsmath}
+\usepackage[margin=3.5cm]{geometry}
+\usepackage{titlesec}
+\usepackage{amsmath}
+\usepackage{amssymb}
+% \linespread{1.6}
+\geometry{left=3.2cm,right=3.2cm,top=3.2cm,bottom=3.2cm}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array} %为了能给表格指定宽度
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{ulem}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usepackage{lipsum}
+
+%\usepackage{mdframed} % 为了在代码周围给出边框，换页时边框保持完整
+\setenumerate[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
+\setitemize[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
+\setdescription{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
+%定理
+\makeatletter
+\thm@headfont{\sc}
+\makeatother
+\newtheorem{theorem}{Theorem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{THU AI Assignment III: Classfication}
+\author{\large Rui\hspace{0.2cm}Wang\footnote{wangrui15@mails.tsinghua.edu.cn} \\ 2015010445}
+\date{}
+\begin{document}
+\maketitle
+\section{Question 1: KNN}
+\subsection{Overview}
+KNN(K-Nearest Neighbors) is a simple algorithm that compares the input with all training data stored, and find k closest to it. The data type that makes up the greatest portion of KNN will be regarded as of the same type as the input.\par
+The only problem I encountered was a misunderstanding: The input in this program is not intended to be a single digit. Rather, it is a \textit{list} of digits. And our task is to complete the classification for all of them.
+\subsection{Introduction to numpy, a python package}
+Numpy is a python module for array operation. According to my own experience, it is just like Matlab which helps users do matrix operations in a convenient, fast way.\par
+Numpy has been a major obstacle in this assignment. The most common issue is that a one-dimensional row vector is not considered a matrix. Thus is can not be transposed. Possible ways are to use \textit{a[:, None]} or \textit{numpy.array([a]).T} to \emph{first change \textit{a} into a two-dimensional array, then take its transpose}.\par
+Also, when taking inner product of two arrays, we have to make the following considerations:
+\begin{itemize}
+  \item The inner product of two one-dimensional row array is just the sum of every corresponding element pair multiplied.
+  \item The inner product of a row vector times a column vector yields an array type \textit{[[number]]}, instead of a single int \textit{number}.
+\end{itemize}
+
+\section{Question 2: Perceptron}
+\subsection{Implementation Notes}
+The algorithm for perceptron is clear. However, there are some common pitfalls.
+\begin{itemize}
+  \item The program uses mini-batch for training. For common mini-batch, a batch of training data is chosen randomly at a time for one step. However, in this implementation, we shuffle all(5000) training data and rearrange them into 100 groups. We use one group to update a step at a time. This is different from common batch algorithm found online, though they are essentially the same.
+  \item The division of two integers in python will always yields an integer! Pay attention when doing division operations.
+  \item Always pay attention to the dimension of arrays. W is a 784 by 10 matrix, while b is 1 by 10. Data to interpret, on the other hand, is 100 by 784. The orders of dimension(e.g. $784 \times 100 V.S. 100 \times 784$) might be different from that in mathematical derivation.
+\end{itemize}
+
+\section{Question 3: Support Vector Machines}
+\subsection{Overview}
+Implementing SVM requires us to follow the instruction file closely.\par
+The kernel trick here could be tricky. Without understanding it, we should at least know that the generation of this kernel actually involves both the data to be identified and the training data stored.
+\subsection{Implementation Notes}
+One common misunderstanding here is also about the input. Test will give 1000 cases altogether. We need to test each of them instead of one of them.\par
+Also, the description for \textit{optimizeConstrainedQuad} is incorrect. Both \textit{x} and \textit{b} parameters for this function are row vectors, so the description should be $min 1/2 x A x^T + b x$. Without recognizing this, the input dimension would be wrong. This requires us to look into the function \textit{optimizeConstrainedQuad} and figure out what input parameters are really intended to be.\par
+The symbol names in the given python file might be confusing. The variables that I used in the end are \textit{alpha, bias} and all the training data for kernel generation. These data end up stored in variables whose names do not actually match their meanings.
+
+\section{Question 4 \& 5: Principal Component Analysis}
+\subsection{Basic Notations}
+  First we clarify some notations and definitions. Data is an m by n matrix, of n column data vectors in space $\mathbf{R}^M$. 
+  We are required to find $l$($l \leqslant m$, denoted as \textit{self.dimension} in out python program) principal components for a vector.\par
+  For a common case like the digit recognition here, typically $n = 5000$ is the size of the training set, $m = 784$ is the total dimension of original feature, while $l = 32$ is the reduced feature dimension.
+  
+\subsection{Relationship with Singular Value Decomposition}
+  On lecture slides, SVD is introduced but the relationship between SVD and PCA is not illustrated. Here I find an easy-to-understand way to explain why SVD can do the same task as PCA while saving the time for eigenvalue calculation.\par
+  Note that the covariance matrix $\Sigma = \frac{1}{N}X_c{X_c}^T$. In PCA theory, we need to calculate the l($l \leqslant m$) eigenvectors with largest eigenvalues $u_1, u_2, ..., u_l$. Now let's suppose we have already found the SVD of $X_c$. We have $X_c = U \Sigma V^T$. Substitute this equation into $X_c {X_C}^T$ and we obtain:
+  $$ X_c {X_C}^T = U \Sigma^2 U^T $$
+  Therefore, U is the eigenvectors of $ X_c {X_C}^T $. The first l columns of U are thus the basis vectors for the principal components.\par
+  To obtain the coordinates of a vector x in {$u_i$} space, we do the inner production of $x, u_i$. Projecting these coordinates back to $\mathbf{R}^M$ and we obtain $\hat{x} = \sum_{i = 1}^{l}(x^T u_i) ui$. This is called the \textbf{reconstruction} of $x$.
+
+\subsection{Implementation Notes}
+  There are several details to be taken into careful consideration when implementing this algorithm.
+  \begin{itemize}
+    \item Matrix dimension. \textit{trainingData} is n by m in our python program. However, in the algorithm, \textit{data} has to be a matrix of column vectors, namely a m by n matrix. So we need to take the transpose of \textit{data} before SVD.
+    \item The SVD function \textit{np.linalg.svd(data)} yields a result like this: $$[U, \Sigma', V^T{'}]$$ where $U$ is an m by m matrix, $\Sigma$ is a row vector of all $\sigma$s on the diagonal of the $\Sigma$ in SVD's mathematical expression. When option \textit{full\_matrices} is disabled, the $V^T{'}$ will be the first m rows of the original $V^T$. Therefore, \textit{np.linalg.svd(data, full\_matrices = False)} gives us sufficient information for projecting data on its m principal directions. That's why we are disabling the \textit{full\_matrices} option.
+  \end{itemize}
+\subsection{Miscellaneous Discussion}
+  There was a pseudo-bug that cost me more than an hour to pin down: that the result of an SVD algorithm is not UNIQUE. Instead, we can invert any of the elements of corresponding U and V, while still obtaining the valid result.\par
+  To explain in a more natural way, the direction of the basis vector can always be inverted while maintaining their orthogonality. Thus the "features" of a vector can vary in their signs. However, When the initial \textit{autograder.py} compared the features it extracted, it did not take into consideration this possibility.\par
+  One suggested method is to simply compare the result of reconstruction with principal components extracted. This result should be unique.\par
+  The \textit{autograder.py} was later updated to tackle this problem.
+
+\end{document}
