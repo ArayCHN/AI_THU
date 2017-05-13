@@ -5,7 +5,7 @@ The assignments of this course partly come from the Berkeley AI project. Assignm
 Homework 3 was basically designed by TA of this course. Topics like KNN, Perceptron, Pricipal Component Analysis etc. are covered.
 
 ## Some Notes
-In order to prevent potential plagarism by future students of this course, hidden pitfalls are implanted in the code. All codes can NOT be directly used. 
+In order to prevent potential plagiarism by future students of this course, hidden pitfalls are implanted in the code. All codes can NOT be directly used. 
 
 Correct algorithms are instead described in these three files:
 
